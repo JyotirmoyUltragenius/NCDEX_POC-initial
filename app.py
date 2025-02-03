@@ -7,6 +7,8 @@ import streamlit as st
 # Streamlit UI
 st.title("PDF Summarizer & Q&A Assistant")
 
+api_key=os.getenv("API_KEY").strip()
+
 # OpenAI API Key Input
 api_key = st.text_input("Enter your OpenAI API key:", type="password")
 if api_key:
