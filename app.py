@@ -30,12 +30,14 @@ if uploaded_file:
     # Extract text from PDFs
     def extract_text_from_pdfs(directory):
         pdf_texts = ""
-        for filename in os.listdir(directory):
-            if filename.endswith(".pdf"):
-                with open(os.path.join(directory, filename), "rb") as pdf_file:
-                    reader = PyPDF2.PdfReader(pdf_file)
-                    for page in reader.pages:
-                        pdf_texts += page.extract_text() + "\n"
+        for root, _, files in os.walk(directory):
+            for filename in files:
+                if filename.endswith(".pdf"):
+                    pdf_path = os.path.join(root, filename)
+                    with open(pdf_path, "rb") as pdf_file:
+                        reader = PyPDF2.PdfReader(pdf_file)
+                        for page in reader.pages:
+                            pdf_texts += page.extract_text() + "\n"
         return pdf_texts
 
     pdf_text = extract_text_from_pdfs(extract_path)
