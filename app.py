@@ -69,28 +69,35 @@ if uploaded_file:
     else:
         st.success("PDFs extracted and processed successfully!")
         
-        # Let the user select a specific PDF from the extracted files
-        selected_pdf = st.selectbox("Select a PDF to work with", options=list(pdf_texts.keys()))
-        selected_text = pdf_texts.get(selected_pdf, "")
-
-        # Summarization Function for a single PDF
+        # Combine all PDF texts for summarization
+        combined_text = "\n".join(pdf_texts.values())
+        
+        # Summarization Function for all PDFs
         def summarize_text(text):
             response = openai.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You are an assistant that summarizes compliance regulations for NCDEX. Read and analyze these documents carefully."},
-                    {"role": "user", "content": f"Summarize this document:\n{text[:4096]}"}
+                    {"role": "user", "content": f"Summarize these documents:\n{text[:4096]}"}
                 ]
             )
             return response.choices[0].message.content
         
-        if st.button("Generate Summary"):
-            summary = summarize_text(selected_text)
-            st.subheader(f"Summary of {selected_pdf}:")
+        if st.button("Generate Summary for All PDFs"):
+            summary = summarize_text(combined_text)
+            st.subheader("Combined Summary of All PDFs:")
             st.write(summary)
         
-        # Q&A Section for the selected PDF
-        st.subheader("Ask Questions Based on the Selected PDF")
+        # Q&A Section
+        st.subheader("Ask Questions Based on the PDFs")
+        # Dropdown to select which PDF context to use (or all together)
+        pdf_options = ["All PDFs"] + list(pdf_texts.keys())
+        selected_option = st.selectbox("Select a PDF to query (or All PDFs for combined context)", options=pdf_options)
+        if selected_option == "All PDFs":
+            selected_text = combined_text
+        else:
+            selected_text = pdf_texts[selected_option]
+        
         user_question = st.text_input("Enter your question:")
         
         def ask_question(question, text):
