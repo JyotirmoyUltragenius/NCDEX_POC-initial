@@ -5,7 +5,7 @@ import openai
 import streamlit as st
 
 # Streamlit UI
-st.title("PDF Summarizer & Q&A Assistant")
+st.title("NCDEX Q&A Assistant")
 
 # Get OpenAI API Key from Environment Variable
 api_key = os.getenv("API_KEY")
