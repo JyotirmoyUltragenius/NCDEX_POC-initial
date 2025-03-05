@@ -1,5 +1,6 @@
 import zipfile
 import os
+import shutil
 import PyPDF2
 import openai
 import streamlit as st
@@ -19,11 +20,18 @@ uploaded_file = st.file_uploader("Upload a ZIP file containing PDFs", type=["zip
 
 if uploaded_file:
     zip_path = "uploaded.zip"
+    # Clear previous zip file if it exists
+    if os.path.exists(zip_path):
+        os.remove(zip_path)
     with open(zip_path, "wb") as f:
         f.write(uploaded_file.getvalue())
 
     extract_path = "extracted_pdfs"
+    # Clear previous extraction folder if it exists
+    if os.path.exists(extract_path):
+        shutil.rmtree(extract_path)
     os.makedirs(extract_path, exist_ok=True)
+    
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(extract_path)
 
