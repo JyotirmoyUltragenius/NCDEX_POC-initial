@@ -27,25 +27,37 @@ if uploaded_file:
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(extract_path)
 
+    # Check for internal folders
+    internal_folders = [f for f in os.listdir(extract_path) if os.path.isdir(os.path.join(extract_path, f))]
+    if internal_folders:
+        st.info(f"Internal folders detected: {internal_folders}. Processing PDFs within these folders.")
+
     # Extract text from PDFs
     def extract_text_from_pdfs(directory):
         pdf_texts = ""
+        # os.walk recursively traverses the directory structure, handling internal folders
         for root, _, files in os.walk(directory):
             for filename in files:
-                if filename.endswith(".pdf"):
+                if filename.lower().endswith(".pdf"):
                     pdf_path = os.path.join(root, filename)
-                    with open(pdf_path, "rb") as pdf_file:
-                        reader = PyPDF2.PdfReader(pdf_file)
-                        for page in reader.pages:
-                            pdf_texts += page.extract_text() + "\n"
+                    try:
+                        with open(pdf_path, "rb") as pdf_file:
+                            reader = PyPDF2.PdfReader(pdf_file)
+                            for page in reader.pages:
+                                text = page.extract_text()
+                                if text:
+                                    pdf_texts += text + "\n"
+                    except Exception as e:
+                        st.error(f"Error processing {pdf_path}: {e}")
         return pdf_texts
 
     pdf_text = extract_text_from_pdfs(extract_path)
-    st.success("PDFs extracted and processed successfully!")
     
     if not pdf_text.strip():
         st.error("No text extracted from the PDFs. Please upload valid documents.")
     else:
+        st.success("PDFs extracted and processed successfully!")
+        
         # Summarization Function
         def summarize_text(text):
             response = openai.chat.completions.create(
